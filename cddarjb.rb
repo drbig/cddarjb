@@ -347,7 +347,7 @@ begin
   CDDARJB.config = File.open(ARGV.first) {|f| YAML.load(f.read) }
   CDDARJB.fire!
 rescue StandardError => e
-  STDERR.puts "Startup error: #{e.to_s} at #{e.backtrace.first}"
+  STDERR.puts "Startup error: #{e.to_s} at #{e.backtrace.first}."
   STDERR.puts 'Sorry.'
   exit(3)
 end
