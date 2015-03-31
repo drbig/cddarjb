@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang='en'>
+  <head>
+    <meta charset='utf-8'>
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content='width=device-width, initial-scale=1' name='viewport'>
+    <title>CDDA Raw JSON Browser</title>
+    <link href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css' rel='stylesheet'>
+    <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css'>
+    <script src='https://code.jquery.com/jquery-2.1.3.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/3.0.1/handlebars.min.js'></script>
+    <script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js'></script>
+    <style>
+body {
+  padding-top: 64px;
+}
+.footer {
+  font-size: 80%;
+  border-top: 1px solid #d0d0d0;
+  padding: 0.2em;
+}
+.types {
+  background-color: #d5d5d5;
+  margin-left: 0.2em;
+}
+.panel-btn {
+  margin-right: 0.5em;
+  cursor: pointer;
+}
+.panel-btn:hover {
+  text-decoration: none;
+  color: red;
+}
+    </style>
+    <script id='t-search' type='text/x-handlebars-template'>
+<div id='panel{{uid}}' class='panel panel-default'>
+<div class='panel-heading'>
+<h3 class='panel-title'>
+<a class='panel-btn' onclick='closePanel({{uid}})'>
+<span class='glyphicon glyphicon-remove' aria-hidden='true'></span>
+</a>
+<a class='panel-btn' href='#search:{{query}}'>
+<span class='glyphicon glyphicon-link' aria-hidden='true'></span>
+</a>
+Search results for "<b>{{query}}</b>"
+</h3>
+</div>
+<div class='panel-body'>
+{{#if data}}
+<table class='table table-striped'>
+<tr>
+<th>ID</th>
+<th>Type</th>
+</tr>
+{{#each data}}
+<tr>
+<td>{{id}}</td>
+<td>
+{{#each types}}
+<a onclick="show('{{this}}', '{{../id}}')">{{this}}</a>
+{{/each}}
+</td>
+</tr>
+{{/each}}
+</table>
+{{else}}
+<h4>Sorry, nothing found.</h4>
+{{/if}}
+</div>
+</div>
+    </script>
+    <script id='t-show' type='text/x-handlebars-template'>
+<div id='panel{{uid}}' class='panel panel-default'>
+<div class='panel-heading'>
+<h3 class='panel-title'>
+<a class='panel-btn' onclick='closePanel({{uid}})'>
+<span class='glyphicon glyphicon-remove' aria-hidden='true'></span>
+</a>
+<a class='panel-btn' href='#blob:{{type}}/{{id}}'>
+<span class='glyphicon glyphicon-link' aria-hidden='true'></span>
+</a>
+Blobs for "<b>{{type}}/{{id}}</b>"
+</h3>
+</div>
+<div class='panel-body'>
+{{#each data}}
+<pre>{{{this}}}</pre>
+{{/each}}
+</div>
+</div>
+    </script>
+    <script id='t-status' type='text/x-handlebars-template'>
+<div id='panel{{uid}}' class='panel panel-default'>
+<div class='panel-heading'>
+<h3 class='panel-title'>
+<a class='panel-btn' onclick='closePanel({{uid}})'>
+<span class='glyphicon glyphicon-remove' aria-hidden='true'></span>
+</a>
+<a class='panel-btn' href='#status'>
+<span class='glyphicon glyphicon-link' aria-hidden='true'></span>
+</a>
+Application status
+</h3>
+</div>
+<div class='panel-body'>
+<pre>
+<b>Backend version: {{data.version}}</b>
+Cache: Size {{data.cache.size}}, H/M: {{data.cache.hit}}/{{data.cache.miss}}
+</pre>
+<h4>Recent update logs</h4>
+{{#each data.logs}}
+<pre>{{this}}</pre>
+{{/each}}
+</div>
+</div>
+    </script>
+    <script id='t-error' type='text/x-handlebars-template'>
+<div id='panel{{uid}}' class='panel panel-danger'>
+<div class='panel-heading'>
+<h3 class='panel-title'>
+<a class='panel-btn' onclick='closePanel({{uid}})'>
+<span class='glyphicon glyphicon-remove' aria-hidden='true'></span>
+</a>
+Error occurred
+</h3>
+</div>
+<div class='panel-body'>
+{{msg}}
+</div>
+</div>
+    </script>
+    <script>
+var backend = 'http://127.0.0.1:8112/backend';
+
+var counter = 0;
+var t_search = Handlebars.compile($('#t-search').html());
+var t_show = Handlebars.compile($('#t-show').html());
+var t_status = Handlebars.compile($('#t-status').html());
+var t_error = Handlebars.compile($('#t-error').html());
+
+function closeAll() {
+  $('#outlet').empty();
+  counter = 0;
+};
+
+function closePanel(uid) {
+  $('#panel' + uid).remove();
+};
+
+function mkUrl() {
+  return backend + '/' + Array.prototype.slice.call(arguments).join('/');
+};
+
+function addPanel(data) {
+  $('#outlet').append(data);
+  $('html, body').animate({scrollTop: $('#panel' + counter).offset().top - 64}, 1000);
+  counter++;
+}
+
+function request(url, template, args) {
+  $.ajax({
+    url: url,
+    success: function(resp, stat, xhr) {
+      if (resp.success) {
+        data = template($.extend({uid: counter, data: resp.data}, args));
+      } else {
+        data = t_error({uid: counter, msg: 'Backend Error: ' + resp.error});
+      }
+      addPanel(data);
+    },
+    error: function(xhr, stat, error) {
+      msg = 'Local Error: ' + url + ' - ' + error;
+      addPanel(t_error({uid: counter, msg: msg}));
+    }
+  });
+};
+
+function search() {
+  query = $('#query').val();
+  if (query == '') { return };
+  request(mkUrl('search', query), t_search, {query: query});
+};
+
+function show(type, id) {
+  request(mkUrl('blobs', type, id), t_show, {type: type, id: id});
+};
+
+function status() {
+  request(mkUrl('status'), t_status, null);
+};
+
+function setup() {
+  $('#query').keyup(function(ev) {
+    if (ev.which == 13) { search(); };
+  });
+  
+  if (window.location.hash.length > 4) {
+    args = window.location.hash.slice(1).split(':');
+
+    switch (args[0]) {
+      case 'blob':
+        if (args.length == 2) {
+          sargs = args[1].split('/');
+          if (sargs.length == 2) { show(sargs[0], sargs[1]); };
+        }
+        break;
+      case 'search':
+        if (args.length == 2) {
+          $('#query').val(args[1]);
+          search();
+        }
+        break;
+      case 'status':
+        status();
+        break;
+    }
+  };
+};
+    </script>
+  </head>
+  <body onload='setup()'>
+    <div class='navbar navbar-inverse navbar-fixed-top' role='navigation'>
+      <div class='container'>
+        <div class='navbar-header'>
+          <button class='navbar-toggle' data-target='.navbar-collapse' data-toggle='collapse' type='button'>
+            <span class='sr-only'>Toggle navigation</span>
+            <span class='icon-bar'></span>
+            <span class='icon-bar'></span>
+            <span class='icon-bar'></span>
+          </button>
+          <a class='navbar-brand' href='/'>CDDA RJB</a>
+        </div>
+        <div class='collapse navbar-collapse'>
+          <ul class='nav navbar-nav navbar-right'>
+            <li>
+              <a href='#status' onclick='status()'>Status</a>
+            </li>
+            <li>
+              <a href='https://github.com/drbig/cddarjb' target='_blank'>About</a>
+            </li>
+          </ul>
+          <div class='navbar-form'>
+            <div class='form-group'>
+              <div class='input-group'>
+                <div class='input-group-addon'>Query</div>
+                <input class='form-control' name='query' id='query' type='text' placeholder='Regexp query string'></input>
+              </div>
+            </div>
+            <button class='btn btn-success' onclick='search()'>Go</button>
+            <button class='btn btn-danger' onclick='closeAll()'>Clr</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id='outlet' class='container'>
+    </div>
+    <div class='container'>
+      <div class='footer'>
+        &copy; Copyright 2015 Piotr S. Staszewski.
+      </div>
+    </div>
+  </body>
+</html>
