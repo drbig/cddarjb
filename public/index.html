@@ -164,12 +164,13 @@ function request(url, template, args) {
       if (resp.success) {
         data = template($.extend({uid: counter, data: resp.data}, args));
       } else {
-        data = t_error({uid: counter, msg: 'Backend Error: ' + resp.error});
+        msg = 'Backend Error: for ' + url + ' Info: "' + resp.error + '".';
+        data = t_error({uid: counter, msg: msg});
       }
       addPanel(data);
     },
-    error: function(xhr, stat, error) {
-      msg = 'Local Error: ' + url + ' - ' + error;
+    error: function(xhr, stat, err) {
+      msg = 'Local Error: for ' + url + ' - Error: "' + err + '", Status: "' + stat + '".';
       addPanel(t_error({uid: counter, msg: msg}));
     }
   });
