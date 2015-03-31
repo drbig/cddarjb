@@ -1,25 +1,43 @@
 #!/usr/bin/env ruby
 
+require 'logger'
 require 'set'
 require 'stringio'
+require 'yaml'
 
 require 'eldr'
 require 'json'
 require 'rack'
 
 module CDDARJB
-  VERSION = '0.3'
+  VERSION = '0.4'
 
-  def self.path; @@path; end
-  def self.path=(str); @@path = str; end
+  @@config = Hash.new
+  def self.config; @@config; end
+  def self.config=(obj); @@config = obj; end
+  def self.log(level, msg); @@config[:logger].send(level, msg) if @@config[:logger]; end
 
-  def self.pass; @@pass; end
-  def self.pass=(str); @@pass = str; end
+  def self.fire!
+    logger = Logger.new(@@config[:log_file] || STDOUT)
+    logger.level = Logger::INFO
+    logger.formatter = if @@config[:no_stamp]
+      lambda {|s,d,p,m| "#{s.ljust(5)} | #{m}\n" }
+    else
+      lambda {|s,d,p,m| "#{Time.now.strftime('%Y-%m-%d %H:%M:%S.%3N')} | #{s.ljust(5)} | #{m}\n" }
+    end
+    @@config[:logger] = logger
 
-  def self.logger; @@logger; end
-  def self.logger=(obj); @@logger = obj; end
-  def self.log(level, msg)
-    @@logger.send(level, msg) if @@logger
+    if @@config[:standalone]
+      self.log :info, 'Starting Standalone...'
+      app = Rack::Builder.new do
+        map '/backend' do run BackendApp.new end
+        map '/' do run FrontendApp.new end
+      end.to_app
+      Rack::Handler::Thin.run(app, @@config[:httpd_opts])
+    else
+      self.log :info, 'Starting Backend...'
+      Rack::Handler::Thin.run(BackendApp.new, @@config[:httpd_opts])
+    end
   end
 
   class Error < StandardError
@@ -47,7 +65,7 @@ module CDDARJB
   class UpdateError < Error; end
 
   class BlobStore
-    IDKEYS = [:id, :ident, :result, :name, :description]
+    ID_KEYS = [:id, :ident, :result, :name, :description]
 
     def initialize(path)
       @path = path
@@ -58,7 +76,7 @@ module CDDARJB
 
     def ready?; @ready; end
     def types; @data.keys; end
-    def id_keys; IDKEYS.map(&:to_s).join(', '); end
+    def id_keys; ID_KEYS.map(&:to_s).join(', '); end
     def logs; @logs.map(&:string); end
 
     def search(str)
@@ -103,7 +121,7 @@ module CDDARJB
                 next
               end
 
-              key = IDKEYS.map{|k| obj.has_key?(k) ? k : nil}.compact
+              key = ID_KEYS.map{|k| obj.has_key?(k) ? k : nil}.compact
 
               if key.empty?
                 skipped_id += 1
@@ -258,7 +276,7 @@ module CDDARJB
     use Rack::ContentLength
 
     def initialize
-      @db = BlobStore.new(CDDARJB.path)
+      @db = BlobStore.new(File.expand_path(CDDARJB.config[:path]))
       @cache = Cache.new(100)
       super
     end
@@ -292,7 +310,7 @@ module CDDARJB
     before do raise NotReadyError.new('Database update in progress.') unless @db.ready? end
 
     post '/update' do
-      raise SecurityError.new('Sorry.') unless params['pass'] == CDDARJB.pass
+      raise SecurityError.new('Sorry.') unless params['pass'] == CDDARJB.config[:password]
       raise UpdateError unless @db.parse!(params['msg'])
       @cache.clear!
       Response.new('Update started.')
@@ -320,22 +338,16 @@ module CDDARJB
   end
 end
 
-require 'logger'
-CDDARJB.logger = Logger.new(STDOUT)
-CDDARJB.logger.level = Logger::DEBUG
-CDDARJB.logger.formatter = lambda do |s,d,p,m|
-  "#{Time.now.strftime('%Y-%m-%d %H:%M:%S.%3N')} | #{s.ljust(5)} | #{m}\n"
+unless ARGV.length == 1
+  STDERR.puts "Usage: #{$PROGRAM_NAME} config.yaml"
+  exit(2)
 end
 
-CDDARJB.path = '/home/drbig/Projects/cdda-dev/data/json'
-CDDARJB.pass = 'secret'
-
-#CDDARJB.log :info, 'Starting Backend...'
-#Rack::Handler::Thin.run(CDDARJB::BackendApp.new, Port: 8112)
-
-CDDARJB.log :info, 'Starting Standalone...'
-app = Rack::Builder.new do
-  map '/backend' do run CDDARJB::BackendApp.new end
-  map '/' do run CDDARJB::FrontendApp.new end
-end.to_app
-Rack::Handler::Thin.run(app, Port: 8112)
+begin
+  CDDARJB.config = File.open(ARGV.first) {|f| YAML.load(f.read) }
+  CDDARJB.fire!
+rescue StandardError => e
+  STDERR.puts "Startup error: #{e.to_s} at #{e.backtrace.first}"
+  STDERR.puts 'Sorry.'
+  exit(3)
+end
