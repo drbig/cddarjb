@@ -5,3 +5,4 @@
 :httpd_opts:
   :Host: 0.0.0.0
   :Port: 8112
+:git_pull: upstream master
