@@ -343,6 +343,8 @@ unless ARGV.length == 1
   exit(2)
 end
 
+STDOUT.sync = STDERR.sync = true
+
 begin
   CDDARJB.config = File.open(ARGV.first) {|f| YAML.load(f.read) }
   CDDARJB.fire!
