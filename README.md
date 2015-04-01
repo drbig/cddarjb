@@ -20,7 +20,7 @@ No memcached, SQL databases, dedicated web servers and so on...
 
 ### Basic deployment guide for non-Rubists
 
-This is example procedure that was tested on Ubuntu 14.04.2 LTS. It's not the shortest way to get it running, but should be easiest and sanest in the long run. It assumes you have installed at least `curl`, `git and `build-essential` packages. It also assumes you have a copy of CDDA's JSON files handy.
+This is example procedure that was tested on Ubuntu 14.04.2 LTS. It's not the shortest way to get it running, but should be easiest and sanest in the long run. It assumes you have installed at least `curl`, `git` and `build-essential` packages. It also assumes you have a copy of CDDA's JSON files handy.
 
 ```bash
 $ gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3
