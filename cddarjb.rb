@@ -18,7 +18,14 @@ module CDDARJB
   def self.log(level, msg); @@config[:logger].send(level, msg) if @@config[:logger]; end
 
   def self.fire!
-    logger = Logger.new(@@config[:log_file] || STDOUT)
+    logger = if @@config[:log_opts]
+      log_path = File.expand_path(@@config[:log_opts][:path])
+      log_file = File.open(log_path, 'a')
+      log_file.sync = true
+      Logger.new(log_file, *@@config[:log_opts][:rotate])
+    else
+      Logger.new(STDOUT)
+    end
     logger.level = Logger::INFO
     logger.formatter = if @@config[:no_stamp]
       lambda {|s,d,p,m| "#{s.ljust(5)} | #{m}\n" }
@@ -26,6 +33,11 @@ module CDDARJB
       lambda {|s,d,p,m| "#{Time.now.strftime('%Y-%m-%d %H:%M:%S.%3N')} | #{s.ljust(5)} | #{m}\n" }
     end
     @@config[:logger] = logger
+
+    if @@config[:background]
+      STDOUT.reopen(log_file)
+      STDERR.reopen(log_file)
+    end
 
     if @@config[:standalone]
       self.log :info, 'Starting Standalone...'
@@ -347,7 +359,16 @@ STDOUT.sync = STDERR.sync = true
 
 begin
   CDDARJB.config = File.open(ARGV.first) {|f| YAML.load(f.read) }
-  CDDARJB.fire!
+  if CDDARJB.config[:background]
+    pid = fork { CDDARJB.fire! }
+    if CDDARJB.config[:pid_file]
+      pid_path = File.expand_path(CDDARJB.config[:pid_file])
+      File.open(pid_path, 'w') {|f| f.puts pid }
+    end
+    Process.detach(pid)
+  else
+    CDDARJB.fire!
+  end
 rescue StandardError => e
   STDERR.puts "Startup error: #{e.to_s} at #{e.backtrace.first}."
   STDERR.puts 'Sorry.'
