@@ -1,0 +1,32 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    daemons (1.2.2)
+    eldr (0.0.4)
+      fast_blank (= 0.0.2)
+      mustermann (= 0.4.0)
+      rack (~> 1.5)
+    eventmachine (1.0.7)
+    fast_blank (0.0.2)
+    httparty (0.13.3)
+      json (~> 1.8)
+      multi_xml (>= 0.5.2)
+    json (1.8.2)
+    multi_xml (0.5.5)
+    mustermann (0.4.0)
+      tool (~> 0.2)
+    rack (1.6.0)
+    thin (1.6.3)
+      daemons (~> 1.0, >= 1.0.9)
+      eventmachine (~> 1.0)
+      rack (~> 1.0)
+    tool (0.2.3)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  eldr
+  httparty
+  rack
+  thin
