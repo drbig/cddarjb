@@ -1,0 +1,15 @@
+---
+:path: ~/Projects/cdda-dev/data/json
+:password: secret
+:standalone: true
+:no_stamp: false
+:log_opts:
+  :path: ~/cddarjb.log
+  :rotate:
+    - weekly
+:background: true
+:pid_file: ~/cddarjb.pid
+:httpd_opts:
+  :Host: 0.0.0.0
+  :Port: 8112
+:git_pull: upstream master
