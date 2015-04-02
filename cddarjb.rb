@@ -10,7 +10,7 @@ require 'json'
 require 'rack'
 
 module CDDARJB
-  VERSION = '0.4'
+  VERSION = '0.5'
 
   @@config = Hash.new
   def self.config; @@config; end
