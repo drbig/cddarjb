@@ -180,7 +180,7 @@ function request(url, template, args) {
 function search() {
   query = $('#query').val();
   if (query == '') { return };
-  request(mkUrl('search', query), t_search, {query: query});
+  request(mkUrl('search', encodeURI(query)), t_search, {query: query});
 };
 
 function show(type, id) {
