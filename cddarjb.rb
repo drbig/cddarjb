@@ -71,6 +71,7 @@ module CDDARJB
 
   class NoTypeError < Error; end
   class NoIDError < Error; end
+  class BadRegexpError < Error; end
 
   class NotReadyError < Error; end
   class SecurityError < Error; end
@@ -92,7 +93,12 @@ module CDDARJB
     def logs; @logs.map(&:string); end
 
     def search(str)
-      @strings.keys.select{|k| k.match(/#{str}/i) }\
+      begin
+        regexp = /#{str}/i
+      rescue RegexpError => e
+        raise BadRegexpError.new("Malformed regexp: #{e.to_s}.")
+      end
+      @strings.keys.select{|k| k.match(regexp) }\
       .map {|i| {id: i, types: @strings[i].to_a } }
     end
 
