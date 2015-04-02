@@ -121,11 +121,12 @@ Cache: Size {{data.cache.size}}, H/M: {{data.cache.hit}}/{{data.cache.miss}}
 <a class='panel-btn' onclick='closePanel({{uid}})'>
 <span class='glyphicon glyphicon-remove' aria-hidden='true'></span>
 </a>
-Error occurred
+{{src}} error occurred
 </h3>
 </div>
 <div class='panel-body'>
-{{msg}}
+<b>{{msg}}</b><br>
+<small>URL: {{url}}</small>
 </div>
 </div>
     </script>
@@ -164,14 +165,14 @@ function request(url, template, args) {
       if (resp.success) {
         data = template($.extend({uid: counter, data: resp.data}, args));
       } else {
-        msg = 'Backend Error: for ' + url + ' Info: "' + resp.error + '".';
-        data = t_error({uid: counter, msg: msg});
+        data = t_error({uid: counter, msg: resp.error, url: url, src: 'Backend'});
       }
       addPanel(data);
     },
     error: function(xhr, stat, err) {
-      msg = 'Local Error: for ' + url + ' - Error: "' + err + '", Status: "' + stat + '".';
-      addPanel(t_error({uid: counter, msg: msg}));
+      msg = ['All I know:', xhr.statusText, stat, err].join(' ');
+      msg += ' - yeah, most likely the backend is unreachable.';
+      addPanel(t_error({uid: counter, msg: msg, url: url, src: 'Frontend'}));
     }
   });
 };
