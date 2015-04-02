@@ -278,6 +278,7 @@ module CDDARJB
       if status == 200
         @body = {success: true, data: body}.to_json
       else
+        @status = 200
         @body = {success: false, error: body}.to_json
       end
     end
