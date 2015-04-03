@@ -134,7 +134,7 @@ Cache: Size {{data.cache.size}}, H/M: {{data.cache.hit}}/{{data.cache.miss}}
     <script>
 var backend = 'http://localhost:8112/backend';
 
-var VERSION = '0.5.1';
+var VERSION = '0.5.2';
 var counter = 0;
 var t_search = Handlebars.compile($('#t-search').html());
 var t_show = Handlebars.compile($('#t-show').html());
@@ -247,7 +247,7 @@ function setup() {
             <div class='form-group'>
               <div class='input-group'>
                 <div class='input-group-addon'>Query</div>
-                <input class='form-control' name='query' id='query' type='text' placeholder='Regexp query string'></input>
+                <input class='form-control' name='query' id='query' type='text' placeholder='Regexp query string'>
               </div>
             </div>
             <button class='btn btn-success' onclick='search()'>Go</button>
