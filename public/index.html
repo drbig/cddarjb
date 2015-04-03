@@ -104,6 +104,7 @@ Application status
 </div>
 <div class='panel-body'>
 <pre>
+<b>Frontend version: {{version}}</b>
 <b>Backend version: {{data.version}}</b>
 Cache: Size {{data.cache.size}}, H/M: {{data.cache.hit}}/{{data.cache.miss}}
 </pre>
@@ -133,6 +134,7 @@ Cache: Size {{data.cache.size}}, H/M: {{data.cache.hit}}/{{data.cache.miss}}
     <script>
 var backend = 'http://localhost:8112/backend';
 
+var VERSION = '0.5.1';
 var counter = 0;
 var t_search = Handlebars.compile($('#t-search').html());
 var t_show = Handlebars.compile($('#t-show').html());
@@ -188,7 +190,7 @@ function show(type, id) {
 };
 
 function status() {
-  request(mkUrl('status'), t_status, null);
+  request(mkUrl('status'), t_status, {version: VERSION});
 };
 
 function setup() {
