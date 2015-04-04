@@ -141,16 +141,52 @@ Cache: Size {{data.cache.size}}, H/M: {{data.cache.hit}}/{{data.cache.miss}}
 </div>
 </div>
     </script>
+    <script id='t-help' type='text/x-handlebars-template'>
+<div id='panel{{uid}}' class='panel panel-default'>
+<div class='panel-heading'>
+<h3 class='panel-title'>
+<a class='panel-btn' onclick='closePanel({{uid}})'>
+<span class='glyphicon glyphicon-remove' aria-hidden='true'></span>
+</a>
+<a class='panel-btn' href='#help'>
+<span class='glyphicon glyphicon-link' aria-hidden='true'></span>
+</a>
+How to use the thing
+</h3>
+</div>
+<div class='panel-body'>
+Basic usage:
+<ul>
+<li>Enter a query and either hit enter or press 'Go'.</li>
+<li>To clear the page hit 'Clr'.</li>
+<li>To close a panel hit the 'X' button in its title bar.</li>
+<li>To share a direct link to a panel use the link of the 'chain' button in its title bar.</a>
+</ul>
+"Advanced" features:
+<ul>
+<li>The query is interpreted as a case-insensitive <a href='http://en.wikipedia.org/wiki/Regexp'>regexp</a>.</li>
+<li>The backend tries to be as agnostic as possible, and you search by whatever was extracted as a unique-ish 'id' key. Blobs without 'type' key are never loaded. See the <a onclick='status()'>status</a> panel.</li>
+<li>You can use keyboard too:
+<ul>
+<li>Right arrow - move to next panel ('down').</li>
+<li>Left arrow - move to previous panel ('up').</li>
+<li>c - close the 'current' panel.</li>
+</ul></li>
+</ul>
+</div>
+</div>
+    </script>
     <script>
 var backend = 'http://localhost:8112/backend';
 
-var VERSION = '0.7';
+var VERSION = '0.8';
 var counter = 0;
 var current = 0;
 var t_search = Handlebars.compile($('#t-search').html());
 var t_show = Handlebars.compile($('#t-show').html());
 var t_status = Handlebars.compile($('#t-status').html());
 var t_error = Handlebars.compile($('#t-error').html());
+var t_help = Handlebars.compile($('#t-help').html());
 
 function closeAll() {
   $('#outlet').empty();
@@ -219,6 +255,10 @@ function status() {
   request(mkUrl('status'), t_status, {version: VERSION});
 };
 
+function help() {
+  addPanel(t_help({uid: counter}));
+}
+
 function setup() {
   $('#query').keyup(function(ev) {
     if (ev.which == 13) { search(); }
@@ -249,6 +289,9 @@ function setup() {
         break;
       case 'status':
         status();
+        break;
+      case 'help':
+        help();
         break;
     }
   };
@@ -285,6 +328,7 @@ function setup() {
             </div>
             <button class='btn btn-success' onclick='search()'>Go</button>
             <button class='btn btn-danger' onclick='closeAll()'>Clr</button>
+            <button class='btn btn-info' onclick='help()'>?</button>
           </div>
         </div>
       </div>
