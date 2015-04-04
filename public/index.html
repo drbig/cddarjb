@@ -7,7 +7,7 @@
     <title>CDDA Raw JSON Browser</title>
     <link href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css' rel='stylesheet'>
     <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css'>
-    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.21.4/css/theme.default.min.css'>
+    <link rel='stylesheet' href='/tablesorter.css'>
     <script src='https://code.jquery.com/jquery-2.1.3.min.js'></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/3.0.1/handlebars.min.js'></script>
     <script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js'></script>
@@ -49,7 +49,7 @@ Search results for "<b>{{query}}</b>"
 </div>
 <div class='panel-body'>
 {{#if data}}
-<table id='table{{uid}}' class='table tablesorter'>
+<table id='table{{uid}}' class='table table-striped'>
 <thead>
 <tr>
 <th>ID</th>
@@ -140,7 +140,7 @@ Cache: Size {{data.cache.size}}, H/M: {{data.cache.hit}}/{{data.cache.miss}}
     <script>
 var backend = 'http://localhost:8112/backend';
 
-var VERSION = '0.6';
+var VERSION = '0.6.1';
 var counter = 0;
 var t_search = Handlebars.compile($('#t-search').html());
 var t_show = Handlebars.compile($('#t-show').html());
