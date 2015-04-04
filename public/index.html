@@ -144,8 +144,9 @@ Cache: Size {{data.cache.size}}, H/M: {{data.cache.hit}}/{{data.cache.miss}}
     <script>
 var backend = 'http://localhost:8112/backend';
 
-var VERSION = '0.6.2';
+var VERSION = '0.7';
 var counter = 0;
+var current = 0;
 var t_search = Handlebars.compile($('#t-search').html());
 var t_show = Handlebars.compile($('#t-show').html());
 var t_status = Handlebars.compile($('#t-status').html());
@@ -170,8 +171,20 @@ function addPanel(data, args) {
     $('#table' + counter).tablesorter({sortList: [[0,0]]});
   }
   $('html, body').animate({scrollTop: $('#panel' + counter).offset().top - 64}, 1000);
+  current = counter;
   counter++;
 }
+
+function selectPanel(offset) {
+  if ($('#outlet').children().length == 0) { return; }
+  do {
+    panel = current + offset;
+    if (panel > (counter - 1)) { panel = 0; }
+    if (panel < 0) { panel = counter - 1; }
+    current = panel;
+  } while ($('#panel' + current).length == 0);
+  $('html, body').animate({scrollTop: $('#panel' + current).offset().top - 64}, 1000);
+};
 
 function request(url, template, args) {
   $.ajax({
@@ -208,7 +221,14 @@ function status() {
 
 function setup() {
   $('#query').keyup(function(ev) {
-    if (ev.which == 13) { search(); };
+    if (ev.which == 13) { search(); }
+  });
+  $('body').keyup(function(ev) {
+    switch (ev.which) {
+      case 37: selectPanel(-1); break;
+      case 39: selectPanel(1); break;
+      case 67: closePanel(current); break;
+    }
   });
   
   if (window.location.hash.length > 4) {
