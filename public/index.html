@@ -164,7 +164,7 @@ Basic usage:
 </ul>
 "Advanced" features:
 <ul>
-<li>The query is interpreted as a case-insensitive <a href='http://en.wikipedia.org/wiki/Regexp'>regexp</a>.</li>
+<li>The query is interpreted as a case-insensitive <a href='http://en.wikipedia.org/wiki/Regexp' target='_blank'>regular expression</a>.</li>
 <li>The backend tries to be as agnostic as possible, and you search by whatever was extracted as a unique-ish 'id' key. Blobs without 'type' key are never loaded. See the <a onclick='status()'>status</a> panel.</li>
 <li>You can use keyboard too:
 <ul>
@@ -179,7 +179,7 @@ Basic usage:
     <script>
 var backend = 'http://localhost:8112/backend';
 
-var VERSION = '0.8';
+var VERSION = '0.8.1';
 var counter = 0;
 var current = 0;
 var t_search = Handlebars.compile($('#t-search').html());
