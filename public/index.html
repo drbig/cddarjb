@@ -35,7 +35,11 @@ body {
 }
     </style>
     <script id='t-search' type='text/x-handlebars-template'>
-<div id='panel{{uid}}' class='panel panel-default'>
+{{#if data}}
+<div id='panel{{uid}}' class='panel panel-success'>
+{{else}}
+<div id='panel{{uid}}' class='panel panel-warning'>
+{{/if}}
 <div class='panel-heading'>
 <h3 class='panel-title'>
 <a class='panel-btn' onclick='closePanel({{uid}})'>
@@ -76,7 +80,7 @@ Search results for "<b>{{query}}</b>"
 </div>
     </script>
     <script id='t-show' type='text/x-handlebars-template'>
-<div id='panel{{uid}}' class='panel panel-default'>
+<div id='panel{{uid}}' class='panel panel-primary'>
 <div class='panel-heading'>
 <h3 class='panel-title'>
 <a class='panel-btn' onclick='closePanel({{uid}})'>
@@ -140,7 +144,7 @@ Cache: Size {{data.cache.size}}, H/M: {{data.cache.hit}}/{{data.cache.miss}}
     <script>
 var backend = 'http://localhost:8112/backend';
 
-var VERSION = '0.6.1';
+var VERSION = '0.6.2';
 var counter = 0;
 var t_search = Handlebars.compile($('#t-search').html());
 var t_show = Handlebars.compile($('#t-show').html());
