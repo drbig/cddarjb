@@ -10,7 +10,7 @@ require 'json'
 require 'rack'
 
 module CDDARJB
-  VERSION = '0.5'
+  VERSION = '0.5.1'
 
   @@config = Hash.new
   def self.config; @@config; end
@@ -150,6 +150,11 @@ module CDDARJB
               type = obj[:type]
               id = obj[key]
 
+              unless id.is_a? String
+                skipped_id += 1
+                next
+              end
+
               @data[type] ||= Hash.new
               @data[type][id] ||= Array.new
               @data[type][id].push(obj)
@@ -161,7 +166,7 @@ module CDDARJB
             end
 
             if skipped_type > 0 || skipped_id > 0
-              log "#{fname} - Blobs without type, id: #{skipped_type}, #{skipped_id}"
+              log "#{fname} - Blobs without reasonable type, id: #{skipped_type}, #{skipped_id}"
             end
           rescue RuntimeError => e
             log "RuntimeError: #{e.to_s}"
