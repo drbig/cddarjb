@@ -10,7 +10,7 @@ require 'json'
 require 'rack'
 
 module CDDARJB
-  VERSION = '0.5.1'
+  VERSION = '0.5.2'
 
   @@config = Hash.new
   def self.config; @@config; end
@@ -382,7 +382,9 @@ begin
     CDDARJB.fire!
   end
 rescue StandardError => e
-  STDERR.puts "Startup error: #{e.to_s} at #{e.backtrace.first}."
+  msg = "Runtime error: #{e.to_s} at #{e.backtrace.first}."
+  STDERR.puts msg
   STDERR.puts 'Sorry.'
+  CDDARJB.log :fatal, msg
   exit(3)
 end
