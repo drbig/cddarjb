@@ -179,7 +179,7 @@ Basic usage:
     <script>
 var backend = 'http://localhost:8112/backend';
 
-var VERSION = '0.8.3';
+var VERSION = '0.8.4';
 var counter = 0;
 var current = 0;
 var t_search = Handlebars.compile($('#t-search').html());
@@ -265,6 +265,7 @@ function setup() {
   });
   $('body').keyup(function(ev) {
     if (document.activeElement.id == 'query') { return; }
+    if (ev.ctrlKey) { return; }
     switch (ev.which) {
       case 37: selectPanel(-1); break;
       case 39: selectPanel(1); break;
