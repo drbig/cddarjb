@@ -10,7 +10,7 @@ require 'json'
 require 'rack'
 
 module CDDARJB
-  VERSION = '0.5.2'
+  VERSION = '0.5.3'
 
   @@config = Hash.new
   def self.config; @@config; end
@@ -84,6 +84,8 @@ module CDDARJB
       @path = path
       @ready = true
       @logs = Array.new
+      @data = Hash.new
+      @strings = Hash.new
       parse!
     end
 
@@ -108,7 +110,6 @@ module CDDARJB
     end
 
     def types_for(id)
-      return nil unless @ready
       @strings[id]
     end
 
@@ -116,8 +117,8 @@ module CDDARJB
       return false unless @ready
 
       @ready = false
-      @data = Hash.new
-      @strings = Hash.new
+      @data.clear
+      @strings.clear
 
       Thread.new do
         CDDARJB.log :info, 'BlobStore update initiated'
@@ -179,6 +180,8 @@ module CDDARJB
         CDDARJB.log :info, 'BlobStore update finished'
         @ready = true
       end
+
+      true
     end
 
     private
