@@ -10,7 +10,7 @@ require 'json'
 require 'rack'
 
 module CDDARJB
-  VERSION = '0.6.1'
+  VERSION = '0.6.2'
 
   @@config = Hash.new
   def self.config; @@config; end
@@ -106,7 +106,7 @@ module CDDARJB
 
     def get(type, id)
       raise NoTypeError.new("Type #{type} not found.") unless @data.has_key? type
-      @data[type][id] or raise NoIDError.new("Path #{type}/#{id} not found.")
+      @data[type][id].dup or raise NoIDError.new("Path #{type}/#{id} not found.")
     end
 
     def types_for(id)
