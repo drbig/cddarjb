@@ -10,7 +10,7 @@ require 'json'
 require 'rack'
 
 module CDDARJB
-  VERSION = '0.6.2'
+  VERSION = '0.6.3'
 
   @@config = Hash.new
   def self.config; @@config; end
@@ -237,7 +237,8 @@ module CDDARJB
 
     def initialize(body, status = 200, header = {})
       @status = status
-      @header = {'Content-Type' => 'application/json'}.merge(header)
+      @header = {'Content-Type' => 'application/json',
+                 'Access-Control-Allow-Origin' => '*'}.merge(header)
       if status == 200
         @body = {success: true, data: body}.to_json
       else
