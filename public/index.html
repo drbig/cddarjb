@@ -7,33 +7,12 @@
     <title>CDDA Raw JSON Browser</title>
     <link href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css' rel='stylesheet'>
     <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css'>
-    <link rel='stylesheet' href='/tablesorter.css'>
+    <link rel='stylesheet' href='css/main.css'>
     <script src='https://code.jquery.com/jquery-2.1.3.min.js'></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/3.0.1/handlebars.min.js'></script>
     <script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js'></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.21.4/js/jquery.tablesorter.js'></script>
-    <style>
-body {
-  padding-top: 64px;
-}
-.footer {
-  font-size: 80%;
-  border-top: 1px solid #d0d0d0;
-  padding: 0.2em;
-}
-.types {
-  background-color: #d5d5d5;
-  margin-left: 0.2em;
-}
-.panel-btn {
-  margin-right: 0.5em;
-  cursor: pointer;
-}
-.panel-btn:hover {
-  text-decoration: none;
-  color: red;
-}
-    </style>
+    <script src='js/main.js'></script>
     <script id='t-search' type='text/x-handlebars-template'>
 {{#if data}}
 <div id='panel{{uid}}' class='panel panel-success'>
@@ -174,129 +153,6 @@ Basic usage:
 </ul>
 </div>
 </div>
-    </script>
-    <script>
-var backend = 'http://localhost:8112/backend';
-
-var VERSION = '0.8.4';
-var counter = 0;
-var current = 0;
-var t_search = Handlebars.compile($('#t-search').html());
-var t_show = Handlebars.compile($('#t-show').html());
-var t_status = Handlebars.compile($('#t-status').html());
-var t_error = Handlebars.compile($('#t-error').html());
-var t_help = Handlebars.compile($('#t-help').html());
-
-function closeAll() {
-  $('#outlet').empty();
-  counter = 0;
-};
-
-function closePanel(uid) {
-  $('#panel' + uid).remove();
-};
-
-function mkUrl() {
-  return backend + '/' + Array.prototype.slice.call(arguments).join('/');
-};
-
-function addPanel(data, args) {
-  $('#outlet').append(data);
-  if (args && args.sortable) {
-    $('#table' + counter).tablesorter({sortList: [[0,0]]});
-  }
-  $('html, body').animate({scrollTop: $('#panel' + counter).offset().top - 64}, 1000);
-  current = counter;
-  counter++;
-}
-
-function selectPanel(offset) {
-  if ($('#outlet').children().length == 0) { return; }
-  do {
-    panel = current + offset;
-    if (panel > (counter - 1)) { panel = 0; }
-    if (panel < 0) { panel = counter - 1; }
-    current = panel;
-  } while ($('#panel' + current).length == 0);
-  $('html, body').animate({scrollTop: $('#panel' + current).offset().top - 64}, 1000);
-};
-
-function request(url, template, args) {
-  $.ajax({
-    url: url,
-    success: function(resp, stat, xhr) {
-      if (resp.success) {
-        data = template($.extend({uid: counter, data: resp.data}, args));
-      } else {
-        data = t_error({uid: counter, msg: resp.error, url: url, src: 'Backend'});
-      }
-      addPanel(data, args);
-    },
-    error: function(xhr, stat, err) {
-      msg = ['All I know:', xhr.statusText, stat, err].join(' ');
-      msg += ' - yeah, most likely the backend is unreachable.';
-      addPanel(t_error({uid: counter, msg: msg, url: url, src: 'Frontend'}));
-    }
-  });
-};
-
-function search() {
-  query = $('#query').val();
-  if (query == '') { return };
-  request(mkUrl('search', encodeURI(query)), t_search, {query: query, sortable: true});
-};
-
-function show(type, id) {
-  request(mkUrl('blobs', type, id), t_show, {type: type, id: id});
-};
-
-function status() {
-  request(mkUrl('status'), t_status, {version: VERSION});
-};
-
-function help() {
-  addPanel(t_help({uid: counter}));
-}
-
-function setup() {
-  $('#query').keyup(function(ev) {
-    if (ev.which == 13) { search(); }
-  });
-  $('body').keyup(function(ev) {
-    if (document.activeElement.id == 'query') { return; }
-    if (ev.ctrlKey) { return; }
-    switch (ev.which) {
-      case 37: selectPanel(-1); break;
-      case 39: selectPanel(1); break;
-      case 67: closePanel(current); break;
-    }
-  });
-  
-  if (window.location.hash.length > 4) {
-    args = window.location.hash.slice(1).split(':');
-
-    switch (args[0]) {
-      case 'blob':
-        if (args.length == 2) {
-          sargs = args[1].split('/');
-          if (sargs.length == 2) { show(sargs[0], sargs[1]); };
-        }
-        break;
-      case 'search':
-        if (args.length == 2) {
-          $('#query').val(args[1]);
-          search();
-        }
-        break;
-      case 'status':
-        status();
-        break;
-      case 'help':
-        help();
-        break;
-    }
-  };
-};
     </script>
   </head>
   <body onload='setup()'>
