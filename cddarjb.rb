@@ -10,7 +10,7 @@ require 'json'
 require 'rack'
 
 module CDDARJB
-  VERSION = '0.5.3'
+  VERSION = '0.6.1'
 
   @@config = Hash.new
   def self.config; @@config; end
@@ -201,51 +201,6 @@ module CDDARJB
     end
   end
 
-  class Cache < Hash
-    def initialize(size)
-      @size = size
-      @hit = @miss = 0
-      @mutex = Mutex.new
-      @keys = Array.new
-    end
-
-    def stats; {size: @size, hit: @hit, miss: @miss}; end
-
-    def clear!
-      @mutex.synchronize do
-        @hit = @miss = 0
-        @keys.clear
-        clear
-      end
-    end
-
-    def [](key)
-      @mutex.synchronize do
-        unless has_key? key
-          @miss += 1
-          return nil
-        end
-
-        @hit += 1
-        @keys.delete(key)
-        @keys.unshift(key)
-        super
-      end
-    end
-
-    def []=(key, value)
-      @mutex.synchronize do
-        if @keys.length == @size
-          last = @keys.pop
-          delete(last)
-        end
-
-        @keys.unshift(key)
-        super
-      end
-    end
-  end
-
   class Logging
     def initialize(app, prefix)
       @app = app
@@ -304,18 +259,7 @@ module CDDARJB
 
     def initialize
       @db = BlobStore.new(File.expand_path(CDDARJB.config[:path]))
-      @cache = Cache.new(100)
       super
-    end
-
-    def use_cache(&blk)
-      key = env['PATH_INFO']
-      if cached = @cache[key]
-        env['my-status'] = 'CH'
-        return cached
-      else
-        @cache[key] = blk.call
-      end
     end
 
     def auto_link(blob)
@@ -339,22 +283,19 @@ module CDDARJB
     post '/update' do
       raise SecurityError.new('Sorry.') unless params['pass'] == CDDARJB.config[:password]
       raise UpdateError unless @db.parse!(params['msg'])
-      @cache.clear!
       Response.new('Update started.')
     end
 
-    get '/status' do Response.new({logs: @db.logs, version: VERSION, cache: @cache.stats}) end
+    get '/status' do Response.new({logs: @db.logs, version: VERSION}) end
 
     get '/types' do Response.new(@db.types) end
 
-    get '/search/:query' do use_cache { Response.new(@db.search(params['query'])) } end
+    get '/search/:query' do Response.new(@db.search(params['query'])) end
 
     get '/blobs/:type/:id' do
-      use_cache do
-        blobs = @db.get(params['type'], params['id'])
-        blobs.map! {|b| auto_link(JSON.pretty_generate(b)) }
-        Response.new(blobs)
-      end
+      blobs = @db.get(params['type'], params['id'])
+      blobs.map! {|b| auto_link(JSON.pretty_generate(b)) }
+      Response.new(blobs)
     end
   end
 
