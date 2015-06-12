@@ -12,7 +12,6 @@
     <script src='https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/3.0.1/handlebars.min.js'></script>
     <script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js'></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.21.4/js/jquery.tablesorter.js'></script>
-    <script src='js/main.js'></script>
     <script id='t-search' type='text/x-handlebars-template'>
 {{#if data}}
 <div id='panel{{uid}}' class='panel panel-success'>
@@ -79,9 +78,10 @@ Blobs for "<b>{{type}}/{{id}}</b>"
 </div>
     </script>
     <script id='t-status' type='text/x-handlebars-template'>
-<div id='panel{{uid}}' class='panel panel-default'>
+<div id="panel{{uid}}" class='panel panel-default'>
 <div class='panel-heading'>
 <h3 class='panel-title'>
+
 <a class='panel-btn' onclick='closePanel({{uid}})'>
 <span class='glyphicon glyphicon-remove' aria-hidden='true'></span>
 </a>
@@ -155,7 +155,7 @@ Basic usage:
 </div>
     </script>
   </head>
-  <body onload='setup()'>
+  <body >
     <div class='navbar navbar-inverse navbar-fixed-top' role='navigation'>
       <div class='container'>
         <div class='navbar-header'>
@@ -170,7 +170,7 @@ Basic usage:
         <div class='collapse navbar-collapse'>
           <ul class='nav navbar-nav navbar-right'>
             <li>
-              <a href='#status' onclick='status()'>Status</a>
+              <a href='#status' id='btn-status'>Status</a>
             </li>
             <li>
               <a href='https://github.com/drbig/cddarjb' target='_blank'>About</a>
@@ -183,9 +183,9 @@ Basic usage:
                 <input class='form-control' name='query' id='query' type='text' placeholder='Regexp query string'>
               </div>
             </div>
-            <button class='btn btn-success' onclick='search()'>Go</button>
-            <button class='btn btn-danger' onclick='closeAll()'>Clr</button>
-            <button class='btn btn-info' onclick='help()'>?</button>
+            <button class='btn btn-success' id='search'>Go</button>
+            <button class='btn btn-danger' id='btn-close-all'>Clr</button>
+            <button class='btn btn-info' id='btn-help'>?</button>
           </div>
         </div>
       </div>
@@ -197,5 +197,7 @@ Basic usage:
         &copy; Copyright 2015 Piotr S. Staszewski.
       </div>
     </div>
+        <script src='js/main.js'></script>
+
   </body>
 </html>

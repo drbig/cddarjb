@@ -1,7 +1,8 @@
 $(function() {
     'use strict';
 
-    var backend = 'http://localhost:8112/backend';
+    // var backend = 'http://localhost:8112/backend';
+    var backend = 'http://kaer.eu.org:8112/backend';
     var VERSION = '0.8.4';
 
     var templates = {
@@ -19,14 +20,16 @@ $(function() {
     var $outlet = $('#outlet');
     var $query = $('#query');
 
-    var _counter = 0;
+    var current;
+    var counter = 1;
     var panelsById = {};
 
-    function uid() {
-        return _counter++;
+    function nextUid() {
+        return counter++;
     }
 
     function scrollTo($target){
+        console.log('off', $target);
         $('html, body').animate({
             scrollTop: $target.offset().top - 64
         }, 1000);
@@ -41,9 +44,9 @@ $(function() {
     }
 
     function addPanel(templateName, data) {
-        $outlet.append(data);
-        var uid = data.uid = uid();
-        var $panel = $('#panel' + uid);
+        var uid = data.uid = nextUid();
+        $outlet.append(template(templateName, data));
+        var $panel = $outlet.find('#panel' + uid);
 
         panelsById[uid] = $panel;
 
@@ -54,16 +57,15 @@ $(function() {
         });
         scrollTo($panel);
         current = uid;
-
         return $panel;
     }
 
-    function (offset) {
+    function selectPanel(offset) {
         if ($outlet.children().length == 0) {
             return;
         }
         do {
-            panel = current + offset;
+            var panel = current + offset;
             if (panel > (counter - 1)) {
                 panel = 0;
             }
@@ -78,6 +80,7 @@ $(function() {
     };
 
     function request(url, templateName, extraData) {
+
         $.ajax({
             url: url,
             success: function(resp, stat, xhr) {
@@ -96,7 +99,7 @@ $(function() {
                     };
                 }
                 tplData = $.extend(tplData, extraData);
-
+                console.log('tplData', tplData);
                 addPanel(templateName, tplData);
             },
             error: function(xhr, stat, err) {
@@ -127,23 +130,28 @@ $(function() {
     }
 
     function show(type, id) {
-        request(mkUrl('blobs', type, id), t_show, {
+        request(mkUrl('blobs', type, id), 'show', {
             type: type,
             id: id
         });
-    }
+    };
 
-    function status() {
-        request(mkUrl('status'), t_status, {
+
+
+   function status(){
+        request(mkUrl('status'), 'status', {
             version: VERSION
         });
     }
 
     function help() {
-        addPanel(t_help({
-            uid: counter
-        }));
+        addPanel('help', {});
     }
+
+    $('#btn-search').on('click', search);
+    $('#btn-status').on('click', status);
+    $('#btn-help').on('click', help);
+    $('#btn-close-all').on('click', closeAll);
 
 
         $query.keyup(function(ev) {
@@ -173,7 +181,7 @@ $(function() {
         });
 
         if (window.location.hash.length > 4) {
-            args = window.location.hash.slice(1).split(':');
+            var args = window.location.hash.slice(1).split(':');
 
             switch (args[0]) {
                 case 'blob':
