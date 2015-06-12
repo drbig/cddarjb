@@ -131,7 +131,7 @@ module CDDARJB
         Dir.glob(File.join(@path, '**', '*.json')).each do |path|
           begin
             fname = File.basename(path)
-            data = File.open(path).read
+            data = File.read(path)
             skipped_type = skipped_id = 0
 
             JSON.parse(data, symbolize_names: true).each do |obj|
