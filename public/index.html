@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang='en'>
-  <head>
-    <meta charset='utf-8'>
-    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
-    <meta content='width=device-width, initial-scale=1' name='viewport'>
-    <title>CDDA Raw JSON Browser</title>
-    <link href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css' rel='stylesheet'>
-    <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css'>
-    <link rel='stylesheet' href='css/main.css'>
-    <script src='https://code.jquery.com/jquery-2.1.3.min.js'></script>
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/3.0.1/handlebars.min.js'></script>
-    <script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js'></script>
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.21.4/js/jquery.tablesorter.js'></script>
-    <script id='t-search' type='text/x-handlebars-template'>
+<head>
+<meta charset='utf-8'>
+<meta content='IE=edge' http-equiv='X-UA-Compatible'>
+<meta content='width=device-width, initial-scale=1' name='viewport'>
+<title>CDDA Raw JSON Browser</title>
+<link href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css' rel='stylesheet'>
+<link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css'>
+<link rel='stylesheet' href='css/main.css'>
+<script src='https://code.jquery.com/jquery-2.1.3.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/3.0.1/handlebars.min.js'></script>
+<script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.21.4/js/jquery.tablesorter.js'></script>
+<script id='t-search' type='text/x-handlebars-template'>
 {{#if data}}
 <div id='panel{{uid}}' class='panel panel-success'>
 {{else}}
@@ -31,7 +31,7 @@ Search results for "<b>{{query}}</b>"
 </div>
 <div class='panel-body'>
 {{#if data}}
-<table id='table{{uid}}' class='table table-striped'>
+<table id='table{{uid}}' class='table table-striped table-sortable'>
 <thead>
 <tr>
 <th>ID</th>
@@ -56,8 +56,8 @@ Search results for "<b>{{query}}</b>"
 {{/if}}
 </div>
 </div>
-    </script>
-    <script id='t-show' type='text/x-handlebars-template'>
+</script>
+<script id='t-show' type='text/x-handlebars-template'>
 <div id='panel{{uid}}' class='panel panel-primary'>
 <div class='panel-heading'>
 <h3 class='panel-title'>
@@ -76,12 +76,11 @@ Blobs for "<b>{{type}}/{{id}}</b>"
 {{/each}}
 </div>
 </div>
-    </script>
-    <script id='t-status' type='text/x-handlebars-template'>
+</script>
+<script id='t-status' type='text/x-handlebars-template'>
 <div id="panel{{uid}}" class='panel panel-default'>
 <div class='panel-heading'>
 <h3 class='panel-title'>
-
 <a class='panel-btn' onclick='closePanel({{uid}})'>
 <span class='glyphicon glyphicon-remove' aria-hidden='true'></span>
 </a>
@@ -102,8 +101,8 @@ Application status
 {{/each}}
 </div>
 </div>
-    </script>
-    <script id='t-error' type='text/x-handlebars-template'>
+</script>
+<script id='t-error' type='text/x-handlebars-template'>
 <div id='panel{{uid}}' class='panel panel-danger'>
 <div class='panel-heading'>
 <h3 class='panel-title'>
@@ -118,8 +117,8 @@ Application status
 <small>URL: {{url}}</small>
 </div>
 </div>
-    </script>
-    <script id='t-help' type='text/x-handlebars-template'>
+</script>
+<script id='t-help' type='text/x-handlebars-template'>
 <div id='panel{{uid}}' class='panel panel-default'>
 <div class='panel-heading'>
 <h3 class='panel-title'>
@@ -153,51 +152,50 @@ Basic usage:
 </ul>
 </div>
 </div>
-    </script>
-  </head>
-  <body >
-    <div class='navbar navbar-inverse navbar-fixed-top' role='navigation'>
-      <div class='container'>
-        <div class='navbar-header'>
-          <button class='navbar-toggle' data-target='.navbar-collapse' data-toggle='collapse' type='button'>
-            <span class='sr-only'>Toggle navigation</span>
-            <span class='icon-bar'></span>
-            <span class='icon-bar'></span>
-            <span class='icon-bar'></span>
-          </button>
-          <a class='navbar-brand' href='/'>CDDA RJB</a>
-        </div>
-        <div class='collapse navbar-collapse'>
-          <ul class='nav navbar-nav navbar-right'>
-            <li>
-              <a href='#status' id='btn-status'>Status</a>
-            </li>
-            <li>
-              <a href='https://github.com/drbig/cddarjb' target='_blank'>About</a>
-            </li>
-          </ul>
-          <div class='navbar-form'>
-            <div class='form-group'>
-              <div class='input-group'>
-                <div class='input-group-addon'>Query</div>
-                <input class='form-control' name='query' id='query' type='text' placeholder='Regexp query string'>
-              </div>
-            </div>
-            <button class='btn btn-success' id='search'>Go</button>
-            <button class='btn btn-danger' id='btn-close-all'>Clr</button>
-            <button class='btn btn-info' id='btn-help'>?</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div id='outlet' class='container'>
-    </div>
+</script>
+</head>
+<body>
+  <div class='navbar navbar-inverse navbar-fixed-top' role='navigation'>
     <div class='container'>
-      <div class='footer'>
-        &copy; Copyright 2015 Piotr S. Staszewski.
+      <div class='navbar-header'>
+        <button class='navbar-toggle' data-target='.navbar-collapse' data-toggle='collapse' type='button'>
+          <span class='sr-only'>Toggle navigation</span>
+          <span class='icon-bar'></span>
+          <span class='icon-bar'></span>
+          <span class='icon-bar'></span>
+        </button>
+        <a class='navbar-brand' href='/'>CDDA RJB</a>
+      </div>
+      <div class='collapse navbar-collapse'>
+        <ul class='nav navbar-nav navbar-right'>
+          <li>
+            <a href='#status' id='btn-status'>Status</a>
+          </li>
+          <li>
+            <a href='https://github.com/drbig/cddarjb' target='_blank'>About</a>
+          </li>
+        </ul>
+        <div class='navbar-form'>
+          <div class='form-group'>
+            <div class='input-group'>
+              <div class='input-group-addon'>Query</div>
+              <input class='form-control' name='query' id='query' type='text' placeholder='Regexp query string'>
+            </div>
+          </div>
+          <button class='btn btn-success' id='btn-search'>Go</button>
+          <button class='btn btn-danger' id='btn-close-all'>Clr</button>
+          <button class='btn btn-info' id='btn-help'>?</button>
+        </div>
       </div>
     </div>
-        <script src='js/main.js'></script>
-
-  </body>
+  </div>
+  <div id='outlet' class='container'>
+  </div>
+  <div class='container'>
+    <div class='footer'>
+      &copy; Copyright 2015 Piotr S. Staszewski.
+    </div>
+  </div>
+  <script src='js/main.js'></script>
+</body>
 </html>
