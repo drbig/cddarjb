@@ -10,7 +10,7 @@ require 'json'
 require 'rack'
 
 module CDDARJB
-  VERSION = '0.6.3'
+  VERSION = '0.7'
 
   @@config = Hash.new
   def self.config; @@config; end
@@ -78,6 +78,7 @@ module CDDARJB
 
   class BlobStore
     ID_KEYS = [:id, :ident, :result, :name, :description]
+    OTHER_KEYS = [:flags, :covers, :fear_triggers, :anger_triggers]
 
     def initialize(path)
       @path = path
@@ -85,12 +86,14 @@ module CDDARJB
       @logs = Array.new
       @data = Hash.new
       @strings = Hash.new
+      @other = Hash.new
       parse!
     end
 
     def ready?; @ready; end
     def types; @data.keys; end
     def id_keys; ID_KEYS.map(&:to_s).join(', '); end
+    def other_keys; OTHER_KEYS.map(&:to_s).join(', '); end
     def logs; @logs.map(&:string); end
 
     def search(str)
@@ -112,19 +115,25 @@ module CDDARJB
       @strings[id]
     end
 
+    def other_for(id)
+      @other[id]
+    end
+
     def parse!(msg = nil)
       return false unless @ready
 
       @ready = false
       @data.clear
       @strings.clear
+      @other.clear
 
       Thread.new do
         CDDARJB.log :info, 'BlobStore update initiated'
 
         log_start
         log "Update info: #{msg}" if msg
-        log "ID keys considered: #{id_keys}\n\n"
+        log "ID keys considered: #{id_keys}\n"
+        log "Other keys considered: #{other_keys}\n\n"
 
         count = 0
         Dir.glob(File.join(@path, '**', '*.json')).each do |path|
@@ -163,6 +172,18 @@ module CDDARJB
 
               @strings[id] ||= Set.new
               @strings[id].add(type)
+
+              OTHER_KEYS.each do |k|
+                if obj.has_key? k
+                  [obj[k]].flatten.each do |e|
+                    t = k.to_s
+                    @other[e] ||= Hash.new
+                    @other[e][t] ||= Hash.new
+                    @other[e][t][id] ||= Array.new
+                    @other[e][t][id].push(type)
+                  end
+                end
+              end
             end
 
             if skipped_type > 0 || skipped_id > 0
@@ -173,7 +194,7 @@ module CDDARJB
           end
         end
 
-        log "\nLoaded: #{count} blobs, #{@data.length} types, #{@strings.length} unique serach strings."
+        log "\nLoaded: #{count} blobs, #{@data.length} types, #{@other.length} other keys, #{@strings.length} unique serach strings."
         log_finish
 
         CDDARJB.log :info, 'BlobStore update finished'
