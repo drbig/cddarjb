@@ -97,7 +97,7 @@ function request(url, templateName, extraData) {
       addPanel(templateName, tplData);
     },
     error: function(xhr, stat, err) {
-      msg = ['All I know:', xhr.statusText, stat, err].join(' ');
+      var msg = ['All I know:', xhr.statusText, stat, err].join(' ');
       msg += ' - yeah, most likely the backend is unreachable.';
       addPanel('error', {
         uid: counter,
