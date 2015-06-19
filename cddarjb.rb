@@ -69,8 +69,7 @@ module CDDARJB
     end
   end
 
-  class NoTypeError < Error; end
-  class NoIDError < Error; end
+  class NotFoundError < Error; end
   class BadRegexpError < Error; end
 
   class NotReadyError < Error; end
@@ -105,8 +104,8 @@ module CDDARJB
     end
 
     def get(type, id)
-      raise NoTypeError.new("Type #{type} not found.") unless @data.has_key? type
-      @data[type][id].dup or raise NoIDError.new("Path #{type}/#{id} not found.")
+      raise NotFoundError.new("Type #{type} not found.") unless @data.has_key? type
+      @data[type][id].dup or raise NotFoundError.new("Path #{type}/#{id} not found.")
     end
 
     def types_for(id)
