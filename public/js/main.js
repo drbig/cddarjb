@@ -1,10 +1,11 @@
 'use strict';
 
 var backend = 'http://localhost:8112/backend';
-var VERSION = '0.9';
+var VERSION = '0.9.1';
 
 var templates = {
   search: Handlebars.compile($('#t-search').html()),
+  list: Handlebars.compile($('#t-list').html()),
   show: Handlebars.compile($('#t-show').html()),
   status: Handlebars.compile($('#t-status').html()),
   error: Handlebars.compile($('#t-error').html()),
@@ -128,6 +129,13 @@ function show(type, id) {
   });
 };
 
+function list(type, id) {
+  request(mkUrl('list', type, id), 'list', {
+    type: type,
+    id: id
+  });
+};
+
 function status() {
   request(mkUrl('status'), 'status', {
     version: VERSION
@@ -185,6 +193,14 @@ $(function() {
         if (args.length == 2) {
           $query.val(args[1]);
           search();
+        }
+        break;
+      case 'list':
+        if (args.length == 2) {
+          var sargs = args[1].split('/');
+          if (sargs.length == 2) {
+            list(sargs[0], sargs[1]);
+          };
         }
         break;
       case 'status':
