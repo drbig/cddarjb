@@ -286,9 +286,16 @@ module CDDARJB
     def auto_link(blob)
       keys = blob.scan(/"(\S+)",?$/).map(&:first).uniq
       reps = keys.map do |k|
-        next nil unless types = @db.types_for(k)
-        links = types.to_a.map {|t| "<a onclick=\"show('#{t}', '#{k}')\">#{t}</a>" }.join(', ')
-        "<span class=\"types\">#{links}</span>"
+        out = String.new
+        if types = @db.types_for(k)
+          links = types.to_a.map{|t| "<a onclick=\"show('#{t}', '#{k}')\">#{t}</a>" }.join(', ')
+          out += "<span class=\"types\">#{links}</span>"
+        end
+        if other = @db.other_for(k)
+          links = other.keys.map{|e| "<a onclick=\"list('#{e}', '#{k}')\">#{e}</a>" }.join(', ')
+          out += "<span class=\"other\">#{links}</span>"
+        end
+        out.empty? ? nil : out
       end
 
       keys.each_with_index do |k, i|
@@ -312,6 +319,13 @@ module CDDARJB
     get '/types' do Response.new(@db.types) end
 
     get '/search/:query' do Response.new(@db.search(params['query'])) end
+
+    get '/list/:type/:id' do
+      types = @db.other_for(params['id'])
+      raise NotFoundError.new("Other #{params['id']} not found.") unless types
+      data = types[params['type']].each_pair.map{|id, ts| {id: id, types: ts} }
+      Response.new(data)
+    end
 
     get '/blobs/:type/:id' do
       blobs = @db.get(params['type'], params['id'])
