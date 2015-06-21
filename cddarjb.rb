@@ -10,7 +10,7 @@ require 'json'
 require 'rack'
 
 module CDDARJB
-  VERSION = '0.6.3'
+  VERSION = '0.7'
 
   @@config = Hash.new
   def self.config; @@config; end
@@ -85,12 +85,14 @@ module CDDARJB
       @logs = Array.new
       @data = Hash.new
       @strings = Hash.new
+      @other = Hash.new
       parse!
     end
 
     def ready?; @ready; end
     def types; @data.keys; end
     def id_keys; ID_KEYS.map(&:to_s).join(', '); end
+    def other_keys; CDDARJB.config[:other_keys]; end
     def logs; @logs.map(&:string); end
 
     def search(str)
@@ -112,19 +114,25 @@ module CDDARJB
       @strings[id]
     end
 
+    def other_for(id)
+      @other[id]
+    end
+
     def parse!(msg = nil)
       return false unless @ready
 
       @ready = false
       @data.clear
       @strings.clear
+      @other.clear
 
       Thread.new do
         CDDARJB.log :info, 'BlobStore update initiated'
 
         log_start
         log "Update info: #{msg}" if msg
-        log "ID keys considered: #{id_keys}\n\n"
+        log "ID keys considered: #{id_keys}\n"
+        log "Other keys considered: #{other_keys.join(', ')}\n\n" if other_keys
 
         count = 0
         Dir.glob(File.join(@path, '**', '*.json')).each do |path|
@@ -163,6 +171,19 @@ module CDDARJB
 
               @strings[id] ||= Set.new
               @strings[id].add(type)
+
+              other_keys.each do |k|
+                k = k.to_sym
+                if obj.has_key? k
+                  [obj[k]].flatten.each do |e|
+                    t = k.to_s
+                    @other[e] ||= Hash.new
+                    @other[e][t] ||= Hash.new
+                    @other[e][t][id] ||= Array.new
+                    @other[e][t][id].push(type)
+                  end
+                end
+              end
             end
 
             if skipped_type > 0 || skipped_id > 0
@@ -173,7 +194,7 @@ module CDDARJB
           end
         end
 
-        log "\nLoaded: #{count} blobs, #{@data.length} types, #{@strings.length} unique serach strings."
+        log "\nLoaded: #{count} blobs, #{@data.length} types, #{@other.length} other keys, #{@strings.length} unique serach strings."
         log_finish
 
         CDDARJB.log :info, 'BlobStore update finished'
@@ -265,9 +286,16 @@ module CDDARJB
     def auto_link(blob)
       keys = blob.scan(/"(\S+)",?$/).map(&:first).uniq
       reps = keys.map do |k|
-        next nil unless types = @db.types_for(k)
-        links = types.to_a.map {|t| "<a onclick=\"show('#{t}', '#{k}')\">#{t}</a>" }.join(', ')
-        "<span class=\"types\">#{links}</span>"
+        out = String.new
+        if types = @db.types_for(k)
+          links = types.to_a.map{|t| "<a onclick=\"show('#{t}', '#{k}')\">#{t}</a>" }.join(', ')
+          out += "<span class=\"types\">#{links}</span>"
+        end
+        if other = @db.other_for(k)
+          links = other.keys.map{|e| "<a onclick=\"list('#{e}', '#{k}')\">#{e}</a>" }.join(', ')
+          out += "<span class=\"other\">#{links}</span>"
+        end
+        out.empty? ? nil : out
       end
 
       keys.each_with_index do |k, i|
@@ -291,6 +319,13 @@ module CDDARJB
     get '/types' do Response.new(@db.types) end
 
     get '/search/:query' do Response.new(@db.search(params['query'])) end
+
+    get '/list/:type/:id' do
+      types = @db.other_for(params['id'])
+      raise NotFoundError.new("Other #{params['id']} not found.") unless types
+      data = types[params['type']].each_pair.map{|id, ts| {id: id, types: ts} }
+      Response.new(data)
+    end
 
     get '/blobs/:type/:id' do
       blobs = @db.get(params['type'], params['id'])

@@ -10,6 +10,13 @@ body {
   background-color: #d5d5d5;
   margin-left: 0.2em;
 }
+.other {
+  background-color: #d5d5d5;
+  margin-left: 0.2em;
+}
+.other a {
+  color: #5d5d5d;
+}
 .panel-btn {
   margin-right: 0.5em;
   cursor: pointer;
