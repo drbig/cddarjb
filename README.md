@@ -57,12 +57,6 @@ A worthwhile blob has to have:
  1. 'type' key
  2. Some 'id'-like key
 
-## Feature branch
-
-As of today (2015-06-19) there is a dedicated `feature-creep` branch for adding stuff that might fail in funny ways the moment the JSON format changes. Of course the idea is *still* to write it in a way that if it fails it does so non-catastrophically, but hey we can be more lenient here.
-
-The general idea is to maybe merge stuff from there to master periodically if it's useful and meets the failure mode.
-
 ## Contributing
 
 Follow the usual GitHub workflow:
