@@ -13,3 +13,9 @@
   :Host: 0.0.0.0
   :Port: 8112
 :git_pull: upstream master
+:other_keys:
+  - flags
+  - covers
+  - fear_triggers
+  - anger_triggers
+  - ammo_effects

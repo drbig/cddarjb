@@ -78,7 +78,6 @@ module CDDARJB
 
   class BlobStore
     ID_KEYS = [:id, :ident, :result, :name, :description]
-    OTHER_KEYS = [:flags, :covers, :fear_triggers, :anger_triggers]
 
     def initialize(path)
       @path = path
@@ -93,7 +92,7 @@ module CDDARJB
     def ready?; @ready; end
     def types; @data.keys; end
     def id_keys; ID_KEYS.map(&:to_s).join(', '); end
-    def other_keys; OTHER_KEYS.map(&:to_s).join(', '); end
+    def other_keys; CDDARJB.config[:other_keys]; end
     def logs; @logs.map(&:string); end
 
     def search(str)
@@ -133,7 +132,7 @@ module CDDARJB
         log_start
         log "Update info: #{msg}" if msg
         log "ID keys considered: #{id_keys}\n"
-        log "Other keys considered: #{other_keys}\n\n"
+        log "Other keys considered: #{other_keys.join(', ')}\n\n" if other_keys
 
         count = 0
         Dir.glob(File.join(@path, '**', '*.json')).each do |path|
@@ -173,7 +172,8 @@ module CDDARJB
               @strings[id] ||= Set.new
               @strings[id].add(type)
 
-              OTHER_KEYS.each do |k|
+              other_keys.each do |k|
+                k = k.to_sym
                 if obj.has_key? k
                   [obj[k]].flatten.each do |e|
                     t = k.to_s
