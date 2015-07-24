@@ -9,6 +9,9 @@ require 'eldr'
 require 'json'
 require 'rack'
 
+# We will get weird errors
+Thread.abort_on_exception = true
+
 module CDDARJB
   VERSION = '0.7'
 
@@ -189,8 +192,8 @@ module CDDARJB
             if skipped_type > 0 || skipped_id > 0
               log "#{fname} - Blobs without reasonable type, id: #{skipped_type}, #{skipped_id}"
             end
-          rescue RuntimeError => e
-            log "RuntimeError: #{e.to_s}"
+          rescue StandardError => e
+            log "#{fname} - Error: #{e.to_s}"
           end
         end
 
