@@ -13,7 +13,7 @@ require 'rack'
 Thread.abort_on_exception = true
 
 module CDDARJB
-  VERSION = '0.7'
+  VERSION = '0.7.1'
 
   @@config = Hash.new
   def self.config; @@config; end
