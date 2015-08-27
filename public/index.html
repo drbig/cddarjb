@@ -113,7 +113,10 @@ Blobs for "<b>{{type}}/{{id}}</b>"
 </div>
 <div class='panel-body'>
 {{#each data}}
-<pre>{{{this}}}</pre>
+<pre>
+<span class='source'>Source: {{{this.source}}}</span>
+{{{this.blob}}}
+</pre>
 {{/each}}
 </div>
 </div>

@@ -25,6 +25,10 @@ body {
   text-decoration: none;
   color: red;
 }
+.source {
+  font-size: 80%;
+  color: #323232;
+}
 
 thead { border-top: #DDD 1px solid; }
 .tablesorter-default .header,

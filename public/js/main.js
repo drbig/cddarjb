@@ -1,7 +1,7 @@
 'use strict';
 
 var backend = 'http://localhost:8112/backend';
-var VERSION = '0.9.1';
+var VERSION = '0.9.2';
 
 var templates = {
   search: Handlebars.compile($('#t-search').html()),
