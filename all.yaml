@@ -1,5 +1,5 @@
 ---
-:path: ~/Projects/cdda-dev/data/json
+:path: ~/Projects/cdda-dev/data
 :password: secret
 :standalone: true
 :no_stamp: false

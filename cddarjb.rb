@@ -13,7 +13,7 @@ require 'rack'
 Thread.abort_on_exception = true
 
 module CDDARJB
-  VERSION = '0.7.1'
+  VERSION = '0.7.2'
 
   @@config = Hash.new
   def self.config; @@config; end
@@ -138,7 +138,10 @@ module CDDARJB
         log "Other keys considered: #{other_keys.join(', ')}\n\n" if other_keys
 
         count = 0
-        Dir.glob(File.join(@path, '**', '*.json')).each do |path|
+        files  = Dir.glob(File.join(@path, %w{json ** *.json}))
+        files += Dir.glob(File.join(@path, %w{mods ** *.json}))
+        files.delete_if {|e| File.basename(e) == 'modinfo.json' }
+        files.each do |path|
           begin
             fname = File.basename(path)
             data = File.read(path)
