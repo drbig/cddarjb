@@ -5,7 +5,7 @@ The [Cataclysm: Dark Days Ahead](http://en.cataclysmdda.com/) Raw JSON Browser.
 Contrary to the [other](http://cdda-trunk.estilofusion.com/) item browser:
 
  - It has only two assumptions about the JSON files and therefore should be hard to break
- - It tries to load as much JSON as possible (including even some mapgen data)
+ - It tries to load as much JSON as possible (e.g. mapgen data, mods...)
  - It presents raw JSON blobs with automatic cross-links where possible
  - It can be live-updated; easy to integrate with git hooks
  - Its code is short and simple
