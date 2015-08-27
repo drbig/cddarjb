@@ -13,7 +13,7 @@ require 'rack'
 Thread.abort_on_exception = true
 
 module CDDARJB
-  VERSION = '0.7.2'
+  VERSION = '0.7.3'
 
   @@config = Hash.new
   def self.config; @@config; end
@@ -110,7 +110,7 @@ module CDDARJB
 
     def get(type, id)
       raise NotFoundError.new("Type #{type} not found.") unless @data.has_key? type
-      @data[type][id].dup or raise NotFoundError.new("Path #{type}/#{id} not found.")
+      @data[type][id] or raise NotFoundError.new("Path #{type}/#{id} not found.")
     end
 
     def types_for(id)
@@ -171,7 +171,7 @@ module CDDARJB
 
               @data[type] ||= Hash.new
               @data[type][id] ||= Array.new
-              @data[type][id].push(obj)
+              @data[type][id].push({blob: obj, source: rel_path(path)})
 
               count += 1
 
@@ -211,6 +211,10 @@ module CDDARJB
     end
 
     private
+
+    def rel_path(path)
+      path.slice(@path.length, path.length) || '???'
+    end
 
     def log_start
       @logs.pop if @logs.length == 3
@@ -334,8 +338,9 @@ module CDDARJB
     end
 
     get '/blobs/:type/:id' do
-      blobs = @db.get(params['type'], params['id'])
-      blobs.map! {|b| auto_link(JSON.pretty_generate(b)) }
+      blobs = @db.get(params['type'], params['id']).map do |b|
+        {blob: auto_link(JSON.pretty_generate(b[:blob])), source: b[:source]}
+      end
       Response.new(blobs)
     end
   end
