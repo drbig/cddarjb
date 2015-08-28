@@ -13,7 +13,7 @@ require 'rack'
 Thread.abort_on_exception = true
 
 module CDDARJB
-  VERSION = '0.7.3'
+  VERSION = '0.7.4'
 
   @@config = Hash.new
   def self.config; @@config; end
@@ -185,8 +185,8 @@ module CDDARJB
                     t = k.to_s
                     @other[e] ||= Hash.new
                     @other[e][t] ||= Hash.new
-                    @other[e][t][id] ||= Array.new
-                    @other[e][t][id].push(type)
+                    @other[e][t][id] ||= Set.new
+                    @other[e][t][id].add(type)
                   end
                 end
               end
@@ -333,7 +333,7 @@ module CDDARJB
     get '/list/:type/:id' do
       types = @db.other_for(params['id'])
       raise NotFoundError.new("Other #{params['id']} not found.") unless types
-      data = types[params['type']].each_pair.map{|id, ts| {id: id, types: ts} }
+      data = types[params['type']].each_pair.map{|id, ts| {id: id, types: ts.to_a} }
       Response.new(data)
     end
 
