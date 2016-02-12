@@ -10,6 +10,7 @@ Contrary to the [other](http://cdda-trunk.estilofusion.com/) item browser:
  - It can be live-updated; easy to integrate with git hooks
  - Its code is short and simple
  - It has minimal dependencies, you can deploy it on pretty much anything; fully standalone
+ - It has stable memory footprint (~240 MB VIRT on Linux, running for months)
 
 Requirements:
 
@@ -71,4 +72,4 @@ Follow the usual GitHub workflow:
 
 Standard two-clause BSD license, see LICENSE.txt for details.
 
-Copyright (c) 2015 Piotr S. Staszewski
+Copyright (c) 2015 - 2016 Piotr S. Staszewski
