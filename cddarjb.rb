@@ -129,6 +129,10 @@ module CDDARJB
       @strings.clear
       @other.clear
 
+      CDDARJB.log :info, 'Starting GC run...'
+      GC.start
+      CDDARJB.log :info, 'Finished GC run'
+
       Thread.new do
         CDDARJB.log :info, 'BlobStore update initiated'
 
