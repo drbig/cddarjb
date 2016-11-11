@@ -152,7 +152,7 @@ module CDDARJB
             skipped_type = skipped_id = 0
 
             JSON.parse(data, symbolize_names: true).each do |obj|
-              unless obj.has_key? :type
+              unless obj.is_a? Hash and obj.has_key? :type
                 skipped_type += 1
                 next
               end
